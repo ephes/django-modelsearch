@@ -22,6 +22,8 @@ from modelsearch.tests.test_backends import BackendTests
     }
 )
 class TestMySQLSearchBackend(BackendTests, TransactionTestCase):
+    # reset_indexes clears every configured connection for this backend.
+    databases = {"default", "other"}
     backend_path = "modelsearch.backends.database.mysql.mysql"
 
     # Overrides parent method, because there's a slight difference in what the MySQL backend supports/accepts as search queries.

@@ -184,18 +184,24 @@ class TestSignalHandlers(TestCase):
             title="Test", publication_date=date(2017, 10, 18), number_of_pages=100
         )
 
+        original_pk = obj.pk
         backend().reset_mock()
         with self.captureOnCommitCallbacks(execute=True):
             obj.delete()
-        backend().delete.assert_called_with(obj)
+        backend().delete.assert_called_once()
+        self.assertEqual(backend().delete.call_args.args[0].pk, original_pk)
+        self.assertIsNone(obj.pk)
 
     def test_index_on_delete_with_uuid_primary_key(self, backend):
         obj = models.AdvertWithCustomUUIDPrimaryKey.objects.create(text="Test")
 
+        original_pk = obj.pk
         backend().reset_mock()
         with self.captureOnCommitCallbacks(execute=True):
             obj.delete()
-        backend().delete.assert_called_with(obj)
+        backend().delete.assert_called_once()
+        self.assertEqual(backend().delete.call_args.args[0].pk, original_pk)
+        self.assertIsNone(obj.pk)
 
     def test_do_not_index_fields_omitted_from_update_fields(self, backend):
         obj = models.Book.objects.create(

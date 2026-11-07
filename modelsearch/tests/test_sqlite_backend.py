@@ -29,6 +29,8 @@ from modelsearch.tests.test_backends import BackendTests
     }
 )
 class TestSQLiteSearchBackend(BackendTests, TestCase):
+    # reset_indexes clears every configured SQLite connection.
+    databases = {"default", "other"}
     backend_path = "modelsearch.backends.database.sqlite.sqlite"
 
     @skip("The SQLite backend doesn't support boosting.")

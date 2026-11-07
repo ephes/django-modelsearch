@@ -218,6 +218,7 @@ def get_indexed_instance(instance, check_exists=True):
         check_exists
         and not type(indexed_instance)
         .get_indexed_objects()
+        .using(indexed_instance._state.db)
         .filter(pk=indexed_instance.pk)
         .exists()
     ):

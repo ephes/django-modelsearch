@@ -1,5 +1,6 @@
 import os
 
+from copy import deepcopy
 from pathlib import Path
 
 import dj_database_url
@@ -83,6 +84,10 @@ PASSWORD_HASHERS = ("django.contrib.auth.hashers.MD5PasswordHasher",)
 DATABASES = {
     "default": dj_database_url.config(default="sqlite:///test_modelsearch.sqlite")
 }
+
+# A separate source database for signal/task routing regressions.
+DATABASES["other"] = deepcopy(DATABASES["default"])
+DATABASES["other"]["NAME"] = str(DATABASES["default"]["NAME"]) + "_other"
 
 if DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql":
     INSTALLED_APPS.append("django.contrib.postgres")

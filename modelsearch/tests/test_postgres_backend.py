@@ -24,6 +24,8 @@ from modelsearch.tests.test_backends import BackendTests
     }
 )
 class TestPostgresSearchBackend(BackendTests, TestCase):
+    # reset_indexes clears every configured connection for this backend.
+    databases = {"default", "other"}
     backend_path = "modelsearch.backends.database.postgres.postgres"
 
     def test_weights(self):

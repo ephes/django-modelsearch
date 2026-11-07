@@ -171,3 +171,30 @@ class Dog(Pet)
 ```
 
 Django ModelSearch will always call `get_indexed_instance` before indexing to get the most specific version of the object to index.
+
+## Automatic updates and transactions
+
+Automatic indexing enqueues save tasks and removes deleted objects only after
+Django commits the source database transaction. Rolling back a transaction (or a
+savepoint) discards its pending callbacks. In autocommit mode, save tasks are
+enqueued immediately; deletion runs after Django commits the delete operation.
+Deletion retains the original primary key, including UUID primary keys.
+
+This timing also applies to database-backed indexes: index changes become
+visible after commit, not inside the transaction that changes the model.
+An indexing or enqueue failure after commit cannot roll back the model change
+and prevents later commit callbacks in that transaction from running.
+Use `rebuild_modelsearch_index` to reconcile indexes when necessary. This is not
+a durable queue/outbox guarantee; task delivery follows your configured
+`django-tasks` backend.
+
+Save tasks reload the object and check its indexed-object membership on the
+source database alias. Already queued tasks with three arguments continue to
+use `default`. Tasks for rows deleted before execution do nothing. Custom
+`get_indexed_instance()` implementations that query other models must also
+respect the instance's source alias. This does not provide separate external
+index namespaces for equal primary keys in different databases.
+
+Django `TestCase` does not commit its wrapping transaction. Tests that assert
+automatic updates should use `captureOnCommitCallbacks(execute=True)` or
+`TransactionTestCase`.
